@@ -4,13 +4,4 @@ class IUser {
     async verifyPassword(password) {}
 }
 
-class ITickets {
-    static async createTicket() {}
-    static async findByEmail(email) {}
-    static async getAllUsers() {}
-    static async deleteUser(email) {}
-    static async updateUser(email, userData) {}
-}
-
 module.exports = IUser
-module.exports = ITickets
