@@ -6,7 +6,7 @@ const generateTicket = async (req, res) => {
     try {
         const { nombre, apellidos, Folio, Origen, Destino, Fecha, HoraSalida, HoraArribo, Total, TokenFacturacion, Asiento } = req.body
         const existingTicket = await Ticket.findByFolio(Folio)
-        if (existingUser) {
+        if (existingTicket) {
             return res.status(400).json({
                 message: 'Folio already exists'
             })
