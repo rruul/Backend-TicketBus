@@ -10,12 +10,11 @@ const createBoleto = async (req, res) => {
     }
 };
 
-const getBoletoById = async (req, res) => {
+const getLatestBoleto = async (req, res) => {
     try {
-        const { id } = req.params;
-        const boleto = await Boleto.getBoletoById(id);
-        if (boleto) {
-            res.json(boleto);
+        const latestBoleto = await Boleto.getLatestBoleto();
+        if (latestBoleto) {
+            res.json(latestBoleto);
         } else {
             res.status(404).json({ message: 'Boleto not found' });
         }
@@ -54,4 +53,4 @@ const updateBoleto = async (req, res) => {
     }
 };
 
-module.exports = { createBoleto, getBoletoById, getAllBoletos, deleteBoleto, updateBoleto };
+module.exports = { createBoleto, getLatestBoleto, getAllBoletos, deleteBoleto, updateBoleto };

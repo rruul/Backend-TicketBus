@@ -24,20 +24,24 @@ class Viaje {
 
     static async getViajeById(id) {
         try {
-            const viajeDoc = await firestore.collection('viajes').doc(id).get();
-            if (viajeDoc.exists) {
-                return new Viaje(id, ...Object.values(viajeDoc.data()));
-            }
-            return null;
+          const viajeDoc = await firestore.collection('viajes').doc(id).get();
+          return { id, ...viajeDoc.data() };
         } catch (error) {
-            console.log('Error: ', error);
+          console.log('Error: ', error);
         }
     }
 
     static async getAllViajes() {
         try {
             const viajes = await firestore.collection('viajes').get();
-            return viajes.docs.map(doc => new Viaje(doc.id, ...Object.values(doc.data())));
+            const allViajes = []
+            viajes.forEach(doc => {
+                allViajes.push({
+                    id: doc.id,
+                    ...doc.data()
+                })
+            })
+            return allViajes;
         } catch (error) {
             console.log('Error: ', error);
         }
@@ -52,11 +56,57 @@ class Viaje {
         }
     }
 
-    static async updateViaje(id, data) {
+    static async reservarAsiento(id, asiento) {
         try {
-            await firestore.collection('viajes').doc(id).update(data);
-            const updatedViaje = await firestore.collection('viajes').doc(id).get();
+            const viajeRef = firestore.collection('viajes').doc(id);
+            const viajeDoc = await viajeRef.get();
+            
+            if (!viajeDoc.exists) {
+                throw new Error('Viaje no encontrado');
+            }
+
+            const viajeData = viajeDoc.data();
+            const asientos = viajeData.Asientos || {};
+            const Ocupados = asientos.Ocupados || [];
+            const Disponibles = asientos.Disponibles || [];
+
+            // Verificar si el asiento ya está ocupado
+            if (Ocupados.includes(asiento)) {
+                throw new Error('El asiento ya está ocupado');
+            }
+
+            // Actualizar los asientos ocupados y disponibles
+            const nuevosOcupados = [...Ocupados, asiento];
+            const nuevosDisponibles = Disponibles.filter(lugar => lugar !== asiento);
+
+            await viajeRef.update({
+                'Asientos.Ocupados': nuevosOcupados,
+                'Asientos.Disponibles': nuevosDisponibles
+            });
+
+            const updatedViaje = await viajeRef.get();
             return { id, ...updatedViaje.data() };
+        } catch (error) {
+            console.log('Error: ', error);
+            throw error;
+        }
+    }
+    static async buscarViaje(origen, destino, Fecha) {
+        try {
+            const viajes = await firestore.collection('viajes')
+            .where('origen', '==', origen)
+            .where('destino', '==', destino)
+            .where('fecha', '==', Fecha)
+            .get();
+            const viaje = []
+            viajes.forEach(doc => {
+            viaje.push({
+                id: doc.id,
+                ...doc.data()
+            })
+            })
+
+            return viaje
         } catch (error) {
             console.log('Error: ', error);
         }

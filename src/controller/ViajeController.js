@@ -43,36 +43,28 @@ const deleteViaje = async (req, res) => {
     }
 };
 
-const updateViaje = async (req, res) => {
+const reservarAsiento = async (req, res) => {
     try {
         const { id } = req.params;
-        const data = req.body;
-        const updatedViaje = await Viaje.updateViaje(id, data);
-        res.json(updatedViaje);
+        const { asiento } = req.body;
+        const viajeActualizado = await Viaje.reservarAsiento(id, asiento);
+        res.json({ viaje: viajeActualizado });
     } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 };
 
 const buscarViaje = async (req, res) => {
     try {
-        const { destino, origen, fecha } = req.query;
-        
-        // Realiza la consulta a Firestore para buscar los viajes que coincidan con los criterios
-        const viajes = await firestore.collection('viajes')
-            .where('destino', '==', destino)
-            .where('origen', '==', origen)
-            .where('fecha', '==', fecha)
-            .get();
-        
-        // Mapea los resultados en objetos Viaje y devuélvelos
-        const viajesEncontrados = viajes.docs.map(doc => new Viaje(doc.id, ...Object.values(doc.data())));
-        
-        res.json(viajesEncontrados);
+      const { origen, destino, Fecha } = req.body; // Accede a los tres parámetros
+      
+      const viajes = await Viaje.buscarViaje(origen, destino, Fecha); // Pasa los tres parámetros a la función buscarViaje
+      
+      res.json(viajes);
     } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error' });
+      res.status(500).json({ message: 'Internal Server Error' });
     }
-};
+  };
 
 
-module.exports = { createViaje, getViajeById, getAllViajes, deleteViaje, updateViaje, buscarViaje };
+module.exports = { createViaje, getViajeById, getAllViajes, deleteViaje, reservarAsiento, buscarViaje };
